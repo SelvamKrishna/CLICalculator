@@ -56,11 +56,11 @@ impl Calculator {
 
     fn tokenizer(&mut self) -> Result<(), CalculatorError> {
         let precedence = |op: char| {
-            return match op {
+            match op {
                 '+' | '-' => 1u8,
                 '*' | '/' => 2u8,
                 _ => 0u8,
-            };
+            }
         };
 
         let mut i = 0;
@@ -76,16 +76,44 @@ impl Calculator {
                 continue;
             }
 
+            if c == '-' {
+                let is_unary = i == 0 || matches!(chars[i - 1], '(' | '+' | '-' | '*' | '/' | ' ');
+                if is_unary && i + 1 < chars.len() && chars[i + 1].is_ascii_digit() {
+                    i += 1;
+                    let mut num_str = String::from("-");
+                    let mut dotted = false;
+
+                    while i < chars.len() && (chars[i].is_ascii_digit() || chars[i] == '.') {
+                        if chars[i] == '.' {
+                            if dotted {
+                                return Err(CalculatorError::InvalidDecimal);
+                            }
+                            dotted = true;
+                        }
+                        num_str.push(chars[i]);
+                        i += 1;
+                    }
+
+                    match num_str.parse::<f32>() {
+                        Ok(n) => self.tokens.push(RPNToken::Number(n)),
+                        Err(_) => {
+                            return Err(CalculatorError::InvalidExpression);
+                        }
+                    }
+                    continue;
+                }
+            }
+
             if c.is_ascii_digit() || c == '.' {
                 let mut num_str = String::new();
                 let mut dotted = false;
+
                 while i < chars.len() && (chars[i].is_ascii_digit() || chars[i] == '.') {
                     if chars[i] == '.' {
-                        if !dotted {
-                            dotted = true;
-                        } else {
+                        if dotted {
                             return Err(CalculatorError::InvalidDecimal);
                         }
+                        dotted = true;
                     }
                     num_str.push(chars[i]);
                     i += 1;
