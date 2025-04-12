@@ -14,6 +14,8 @@ pub enum CalculatorError {
     UnsupportedToken,
     MismatchedParantheses,
     InvalidExpression,
+    InvalidDecimal,
+    ZeroDivision,
 }
 
 impl fmt::Display for CalculatorError {
@@ -30,6 +32,15 @@ impl fmt::Display for CalculatorError {
                     f,
                     "Error: The expression is invalid — it may be incomplete, malformed, or missing operands."
                 )
+            }
+            CalculatorError::InvalidDecimal => {
+                write!(
+                    f,
+                    "Error: The expression contains an invalid decimal number. There are more than 1 '.' within a number."
+                )
+            }
+            CalculatorError::ZeroDivision => {
+                write!(f, "Error: Trying to divide by 0 is mathematically undefeined.")
             }
         };
     }
@@ -67,7 +78,15 @@ impl Calculator {
 
             if c.is_ascii_digit() || c == '.' {
                 let mut num_str = String::new();
+                let mut dotted = false;
                 while i < chars.len() && (chars[i].is_ascii_digit() || chars[i] == '.') {
+                    if chars[i] == '.' {
+                        if !dotted {
+                            dotted = true;
+                        } else {
+                            return Err(CalculatorError::InvalidDecimal);
+                        }
+                    }
                     num_str.push(chars[i]);
                     i += 1;
                 }
@@ -135,7 +154,12 @@ impl Calculator {
                         '+' => a + b,
                         '-' => a - b,
                         '*' => a * b,
-                        '/' => a / b,
+                        '/' => {
+                            if b == 0.0 {
+                                return Err(CalculatorError::ZeroDivision);
+                            }
+                            a / b
+                        }
                         _ => unreachable!(),
                     };
                     result.push(out);
