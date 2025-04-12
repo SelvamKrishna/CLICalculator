@@ -1,13 +1,5 @@
 use std::fmt;
 
-fn precedence(op: char) -> Option<u8> {
-    return match op {
-        '+' | '-' => { Some(1) }
-        '*' | '/' => { Some(2) }
-        _ => { None }
-    };
-}
-
 enum RPNToken {
     Operation(char),
     Number(f32),
@@ -52,10 +44,18 @@ impl Calculator {
     }
 
     fn tokenizer(&mut self) -> Result<(), CalculatorError> {
+        let precedence = |op: char| {
+            return match op {
+                '+' | '-' => 1u8,
+                '*' | '/' => 2u8,
+                _ => 0u8,
+            };
+        };
+
+        let mut i = 0;
         self.tokens.clear();
         let mut operations = Vec::new();
         let chars: Vec<char> = self.expr.chars().collect();
-        let mut i = 0;
 
         while i < chars.len() {
             let c = chars[i];
@@ -84,7 +84,7 @@ impl Calculator {
             match c {
                 '+' | '-' | '*' | '/' => {
                     while let Some(&top) = operations.last() {
-                        if precedence(top).unwrap_or(0) >= precedence(c).unwrap_or(0) {
+                        if precedence(top) >= precedence(c) {
                             self.tokens.push(RPNToken::Operation(operations.pop().unwrap()));
                         } else {
                             break;
