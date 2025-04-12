@@ -21,27 +21,16 @@ pub enum CalculatorError {
 impl fmt::Display for CalculatorError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         return match self {
-            CalculatorError::UnsupportedToken => {
-                write!(f, "Error: The expression contains an unsupported token")
-            }
-            CalculatorError::MismatchedParantheses => {
-                write!(f, "Error: Mismatched parentheses — make sure every '(' has a matching ')'.")
-            }
-            CalculatorError::InvalidExpression => {
-                write!(
-                    f,
-                    "Error: The expression is invalid — it may be incomplete, malformed, or missing operands."
-                )
-            }
-            CalculatorError::InvalidDecimal => {
-                write!(
-                    f,
-                    "Error: The expression contains an invalid decimal number. There are more than 1 '.' within a number."
-                )
-            }
-            CalculatorError::ZeroDivision => {
-                write!(f, "Error: Trying to divide by 0 is mathematically undefeined.")
-            }
+            CalculatorError::UnsupportedToken =>
+                write!(f, "Error: The expression contains an unsupported token."),
+            CalculatorError::MismatchedParantheses =>
+                write!(f, "Error: Ensure all parantheses is properly closed and opened."),
+            CalculatorError::InvalidExpression =>
+                write!(f, "Error: The expression is invalid — it may be incomplete or malformed."),
+            CalculatorError::InvalidDecimal =>
+                write!(f, "Error: The expression contains an invalid decimal number."),
+            CalculatorError::ZeroDivision =>
+                write!(f, "Error: Dividing by 0 is a mathematically undefeined behaviour."),
         };
     }
 }
@@ -166,8 +155,8 @@ impl Calculator {
                     if result.len() < 2 {
                         return Err(CalculatorError::InvalidExpression);
                     }
-                    let b = result.pop().unwrap();
-                    let a = result.pop().unwrap();
+                    let b = result.pop().ok_or(CalculatorError::InvalidExpression)?;
+                    let a = result.pop().ok_or(CalculatorError::InvalidExpression)?;
                     let out = match op {
                         '+' => a + b,
                         '-' => a - b,
