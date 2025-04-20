@@ -20,7 +20,7 @@ pub enum CalculatorError {
 
 impl fmt::Display for CalculatorError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        return match self {
+        match self {
             CalculatorError::UnsupportedToken =>
                 write!(f, "Error: The expression contains an unsupported token."),
             CalculatorError::MismatchedParantheses =>
@@ -31,16 +31,16 @@ impl fmt::Display for CalculatorError {
                 write!(f, "Error: The expression contains an invalid decimal number."),
             CalculatorError::ZeroDivision =>
                 write!(f, "Error: Dividing by 0 is a mathematically undefeined behaviour."),
-        };
+        }
     }
 }
 
 impl Calculator {
     pub fn new(expr: String) -> Self {
-        return Calculator {
+        Calculator {
             tokens: Vec::new(),
             expr,
-        };
+        }
     }
 
     fn parse_number(
@@ -66,7 +66,7 @@ impl Calculator {
             num_str.push(chars[*i]);
             *i += 1;
         }
-        return num_str.parse::<f32>().map_err(|_| CalculatorError::InvalidExpression);
+        num_str.parse::<f32>().map_err(|_| CalculatorError::InvalidExpression)
     }
 
     fn tokenizer(&mut self) -> Result<(), CalculatorError> {
@@ -142,7 +142,7 @@ impl Calculator {
             self.tokens.push(RPNToken::Operation(op));
         }
 
-        return Ok(());
+        Ok(())
     }
 
     pub fn eval(&mut self) -> Result<f32, CalculatorError> {
@@ -175,10 +175,10 @@ impl Calculator {
             }
         }
 
-        return if let Some(value) = result.pop() {
+        if let Some(value) = result.pop() {
             Ok(value)
         } else {
             Err(CalculatorError::InvalidExpression)
-        };
+        }
     }
 }
